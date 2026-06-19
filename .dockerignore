@@ -1,0 +1,12 @@
+node_modules
+dist
+build
+.git
+.gitignore
+db.json
+backend/__pycache__
+backend/production_fallback.db
+.env
+.env.example
+*.log
+README.md

@@ -1,0 +1,172 @@
+{
+  "products": [
+    {
+      "id": "p1",
+      "name": "Ergonomic Office Chair",
+      "sku": "CHAIR-001",
+      "price": 249.99,
+      "quantity": 40
+    },
+    {
+      "id": "p2",
+      "name": "Mechanical Keyboard",
+      "sku": "KEY-002",
+      "price": 129.99,
+      "quantity": 120
+    },
+    {
+      "id": "p3",
+      "name": "UltraWide Monitor 34\"",
+      "sku": "MON-003",
+      "price": 449.99,
+      "quantity": 8
+    },
+    {
+      "id": "p4",
+      "name": "Noise-Cancelling Headphones",
+      "sku": "AUD-004",
+      "price": 199.99,
+      "quantity": 32
+    },
+    {
+      "id": "p5",
+      "name": "USB-C Multiport Hub",
+      "sku": "HUB-005",
+      "price": 59.99,
+      "quantity": 4
+    }
+  ],
+  "customers": [
+    {
+      "id": "c1",
+      "name": "Sarah Connor",
+      "email": "sarah@sky.net",
+      "phone": "555-0199"
+    },
+    {
+      "id": "c2",
+      "name": "Marcus Wright",
+      "email": "marcus@cyberdyne.org",
+      "phone": "555-0142"
+    },
+    {
+      "id": "c3",
+      "name": "John Connor",
+      "email": "john@resistance.io",
+      "phone": "555-0101"
+    }
+  ],
+  "orders": [
+    {
+      "id": "o_jan",
+      "customerId": "c1",
+      "customerName": "Sarah Connor",
+      "items": [
+        {
+          "productId": "p2",
+          "productName": "Mechanical Keyboard",
+          "price": 129.99,
+          "quantity": 2
+        }
+      ],
+      "totalAmount": 259.98,
+      "createdAt": "2026-01-15T10:00:00.000Z"
+    },
+    {
+      "id": "o_feb",
+      "customerId": "c2",
+      "customerName": "Marcus Wright",
+      "items": [
+        {
+          "productId": "p1",
+          "productName": "Ergonomic Office Chair",
+          "price": 249.99,
+          "quantity": 2
+        }
+      ],
+      "totalAmount": 499.98,
+      "createdAt": "2026-02-20T14:30:00.000Z"
+    },
+    {
+      "id": "o_mar",
+      "customerId": "c3",
+      "customerName": "John Connor",
+      "items": [
+        {
+          "productId": "p4",
+          "productName": "Noise-Cancelling Headphones",
+          "price": 199.99,
+          "quantity": 1
+        }
+      ],
+      "totalAmount": 199.99,
+      "createdAt": "2026-03-10T11:20:00.000Z"
+    },
+    {
+      "id": "o_apr",
+      "customerId": "c1",
+      "customerName": "Sarah Connor",
+      "items": [
+        {
+          "productId": "p5",
+          "productName": "USB-C Multiport Hub",
+          "price": 59.99,
+          "quantity": 3
+        }
+      ],
+      "totalAmount": 179.97,
+      "createdAt": "2026-04-05T09:15:00.000Z"
+    },
+    {
+      "id": "o_may",
+      "customerId": "c2",
+      "customerName": "Marcus Wright",
+      "items": [
+        {
+          "productId": "p3",
+          "productName": "UltraWide Monitor 34\"",
+          "price": 449.99,
+          "quantity": 2
+        }
+      ],
+      "totalAmount": 899.98,
+      "createdAt": "2026-05-18T16:45:00.000Z"
+    },
+    {
+      "id": "o1",
+      "customerId": "c1",
+      "customerName": "Sarah Connor",
+      "items": [
+        {
+          "productId": "p1",
+          "productName": "Ergonomic Office Chair",
+          "price": 249.99,
+          "quantity": 1
+        },
+        {
+          "productId": "p4",
+          "productName": "Noise-Cancelling Headphones",
+          "price": 199.99,
+          "quantity": 2
+        }
+      ],
+      "totalAmount": 649.97,
+      "createdAt": "2026-06-17T00:07:39.004Z"
+    },
+    {
+      "id": "o2",
+      "customerId": "c3",
+      "customerName": "John Connor",
+      "items": [
+        {
+          "productId": "p2",
+          "productName": "Mechanical Keyboard",
+          "price": 129.99,
+          "quantity": 1
+        }
+      ],
+      "totalAmount": 129.99,
+      "createdAt": "2026-06-18T12:07:39.005Z"
+    }
+  ]
+}

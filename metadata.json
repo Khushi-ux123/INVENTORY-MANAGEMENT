@@ -1,0 +1,6 @@
+{
+  "name": "Inventory & Order Management",
+  "description": "Full-stack containerized inventory, customer, and order management system with responsive dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
