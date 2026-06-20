@@ -2,9 +2,37 @@ import express from "express";
 import path from "path";
 import fs from "fs";
 import { createServer as createViteServer } from "vite";
+import pg from "pg";
+
+const { Pool } = pg;
 
 const PORT = Number(process.env.PORT) || 3000;
-const DB_FILE = process.env.DB_PATH || path.join(process.cwd(), "db.json");
+
+function getDatabasePath(): string {
+  let targetPath = process.env.DB_PATH;
+  if (targetPath) {
+    // If the path is set to the system root, redirect to the project's directory
+    if (targetPath === "/db.json" || targetPath === "db.json") {
+      targetPath = path.join(process.cwd(), "db.json");
+    }
+  } else {
+    targetPath = path.join(process.cwd(), "db.json");
+  }
+
+  try {
+    const dir = path.dirname(targetPath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.accessSync(dir, fs.constants.W_OK);
+    return targetPath;
+  } catch (e) {
+    console.warn(`Chosen path ${targetPath} is not writable. Falling back to /tmp/db.json for serverless compatibility.`);
+    return "/tmp/db.json";
+  }
+}
+
+const DB_FILE = getDatabasePath();
 
 interface Product {
   id: string;
@@ -83,7 +111,20 @@ const initialData: Database = {
 };
 
 // Database helper functions
-function loadDb(): Database {
+let dbCache: Database | null = null;
+let pool: pg.Pool | null = null;
+
+if (process.env.DATABASE_URL) {
+  console.log("DATABASE_URL detected. Setting up PostgreSQL Pool with Neon...");
+  pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+      rejectUnauthorized: false
+    }
+  });
+}
+
+function loadDbFromFile(): Database {
   try {
     if (fs.existsSync(DB_FILE)) {
       const content = fs.readFileSync(DB_FILE, "utf-8");
@@ -94,21 +135,87 @@ function loadDb(): Database {
   }
   
   // Write initial data if DB file doesn't exist
-  saveDb(initialData);
+  try {
+    fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2), "utf-8");
+  } catch (writeErr) {
+    console.error("Error creating local fallback db.json seed:", writeErr);
+  }
   return initialData;
 }
 
-function saveDb(data: Database): void {
+async function initPostgres(): Promise<void> {
+  if (!pool) {
+    console.log("No DATABASE_URL configured. Server will run on local file JSON database.");
+    dbCache = loadDbFromFile();
+    return;
+  }
+
   try {
-    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), "utf-8");
-  } catch (error) {
-    console.error("Error writing database file:", error);
+    console.log("Initializing Neon PostgreSQL storage table if not exists...");
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS app_state (
+        key VARCHAR(50) PRIMARY KEY,
+        data JSONB NOT NULL,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    const res = await pool.query("SELECT data FROM app_state WHERE key = 'main_db';");
+    if (res.rows.length === 0) {
+      console.log("Seeding Neon PostgreSQL with initial data...");
+      await pool.query(
+        "INSERT INTO app_state (key, data) VALUES ('main_db', $1);",
+        [JSON.stringify(initialData)]
+      );
+      dbCache = initialData;
+    } else {
+      console.log("Database state fetched from Neon PostgreSQL successfully.");
+      dbCache = res.rows[0].data as Database;
+    }
+  } catch (err) {
+    console.error("Failed to connect or initialize Neon PostgreSQL! Falling back to file DB:", err);
+    pool = null; // Mark fallback
+    dbCache = loadDbFromFile();
+  }
+}
+
+function loadDb(): Database {
+  if (dbCache) {
+    return dbCache;
+  }
+  dbCache = loadDbFromFile();
+  return dbCache;
+}
+
+function saveDb(data: Database): void {
+  dbCache = data; // Instantly write cache so next GET matches current mutations
+  
+  if (pool) {
+    // Non-blocking write to Neon PostgreSQL in the background
+    pool.query(
+      `INSERT INTO app_state (key, data, updated_at)
+       VALUES ('main_db', $1, CURRENT_TIMESTAMP)
+       ON CONFLICT (key)
+       DO UPDATE SET data = EXCLUDED.data, updated_at = EXCLUDED.updated_at;`,
+      [JSON.stringify(data)]
+    ).catch(err => {
+      console.error("Failed to persist update asynchronously to Neon PostgreSQL:", err);
+    });
+  } else {
+    try {
+      fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), "utf-8");
+    } catch (error) {
+      console.error("Error writing database file:", error);
+    }
   }
 }
 
 async function startServer() {
   const app = express();
   app.use(express.json());
+
+  // Initialize DB before routing requests
+  await initPostgres();
 
   // API Routes
   
