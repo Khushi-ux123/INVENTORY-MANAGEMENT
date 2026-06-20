@@ -214,26 +214,43 @@ function saveDb(data: Database): void {
 async function startServer() {
   const app = express();
   
-  // Robust CORS configuration to dynamically echo the requesting origin
+  // Robust CORS configuration to allow all external origins
   app.use(cors({
-    origin: (origin, callback) => {
-      // If there is no origin (e.g. mobile apps, curl, server-to-server), allow it
-      if (!origin) return callback(null, true);
-      callback(null, origin);
-    },
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "Origin", "Accept", "X-Requested-With"],
-    credentials: true,
-    preflightContinue: false,
-    optionsSuccessStatus: 204
+    optionsSuccessStatus: 200
   }));
+
+  // Handle all options preflights
+  app.options("*", cors());
 
   app.use(express.json());
 
-  // Initialize DB before routing requests
-  await initPostgres();
+  // Eagerly load fallback file database cache so the server is instantly responsive
+  dbCache = loadDbFromFile();
+
+  // Initialize Neon PostgreSQL asynchronously in the background.
+  // This guarantees the express app binds to the PORT immediately and starts running on Render.
+  initPostgres()
+    .then(() => {
+      console.log("Neon PostgreSQL pool initialization finished in background.");
+    })
+    .catch(err => {
+      console.error("Neon PostgreSQL connection error occurred asynchronously:", err);
+    });
 
   // API Routes
+
+  // 0. DIAGNOSTIC HEALTH CHECK
+  app.get("/api/health", (req, res) => {
+    res.json({
+      status: "ok",
+      databaseLoaded: !!dbCache,
+      postgresConnected: !!pool,
+      uptime: process.uptime()
+    });
+  });
   
   // 1. PRODUCTS
   
