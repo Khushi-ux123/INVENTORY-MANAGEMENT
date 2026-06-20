@@ -214,16 +214,28 @@ function saveDb(data: Database): void {
 async function startServer() {
   const app = express();
   
-  // Robust CORS configuration to allow all external origins
+  // Robust CORS configuration to dynamically echo the requesting origin.
+  // This satisfies browser requirements when client-side requests utilize credentials
+  // and prevents blocks associated with wildcard "*" headers.
   app.use(cors({
-    origin: "*",
+    origin: (origin, callback) => {
+      // Allow any requesting origin dynamically
+      callback(null, true);
+    },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "Origin", "Accept", "X-Requested-With"],
+    credentials: true,
     optionsSuccessStatus: 200
   }));
 
-  // Handle all options preflights
-  app.options("*", cors());
+  // Handle all options preflights using the same dynamic origin configuration
+  app.options("*", cors({
+    origin: (origin, callback) => {
+      callback(null, true);
+    },
+    credentials: true,
+    optionsSuccessStatus: 200
+  }));
 
   app.use(express.json());
 
