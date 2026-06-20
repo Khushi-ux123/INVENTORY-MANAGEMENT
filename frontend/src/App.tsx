@@ -21,7 +21,7 @@ import CustomerSection from "./components/CustomerSection";
 import OrderSection from "./components/OrderSection";
 import { Product, Customer, Order, DashboardStats } from "./types";
 
-const API_BASE = ((import.meta as any).env?.VITE_API_URL as string) || "";
+const API_BASE = (import.meta.env.VITE_API_URL as string) || "";
 
 export default function App() {
   // Navigation active tab index
