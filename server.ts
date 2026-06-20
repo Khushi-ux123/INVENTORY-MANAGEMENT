@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import path from "path";
 import fs from "fs";
 import { createServer as createViteServer } from "vite";
@@ -212,19 +213,16 @@ function saveDb(data: Database): void {
 
 async function startServer() {
   const app = express();
-  app.use(express.json());
+  
+  // Robust CORS configuration to allow Vercel and all external origins
+  app.use(cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Origin", "Accept", "X-Requested-With"],
+    credentials: true
+  }));
 
-  // CORS middleware to support external frontends like Vercel
-  app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-    if (req.method === "OPTIONS") {
-      res.sendStatus(200);
-    } else {
-      next();
-    }
-  });
+  app.use(express.json());
 
   // Initialize DB before routing requests
   await initPostgres();
