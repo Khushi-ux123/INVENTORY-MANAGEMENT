@@ -2,13 +2,9 @@ import express from "express";
 import path from "path";
 import fs from "fs";
 import { createServer as createViteServer } from "vite";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const PORT = Number(process.env.PORT) || 3000;
-const DB_FILE = path.join(process.cwd(), "db.json");
+const DB_FILE = process.env.DB_PATH || path.join(process.cwd(), "db.json");
 
 interface Product {
   id: string;
