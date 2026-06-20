@@ -21,6 +21,8 @@ import CustomerSection from "./components/CustomerSection";
 import OrderSection from "./components/OrderSection";
 import { Product, Customer, Order, DashboardStats } from "./types";
 
+const API_BASE = ((import.meta as any).env?.VITE_API_URL as string) || "";
+
 export default function App() {
   // Navigation active tab index
   const [activeTab, setActiveTab] = useState<string>("dashboard");
@@ -70,10 +72,10 @@ export default function App() {
   const fetchEverything = async () => {
     try {
       const [productsRes, customersRes, ordersRes, statsRes] = await Promise.all([
-        fetch("/api/products"),
-        fetch("/api/customers"),
-        fetch("/api/orders"),
-        fetch("/api/dashboard/stats")
+        fetch(`${API_BASE}/api/products`),
+        fetch(`${API_BASE}/api/customers`),
+        fetch(`${API_BASE}/api/orders`),
+        fetch(`${API_BASE}/api/dashboard/stats`)
       ]);
 
       if (!productsRes.ok || !customersRes.ok || !ordersRes.ok || !statsRes.ok) {
@@ -109,7 +111,7 @@ export default function App() {
   // Helper handling API actions
   const onAddProduct = async (product: Omit<Product, "id">): Promise<boolean> => {
     try {
-      const res = await fetch("/api/products", {
+      const res = await fetch(`${API_BASE}/api/products`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(product)
@@ -130,7 +132,7 @@ export default function App() {
 
   const onUpdateProduct = async (id: string, product: Omit<Product, "id">): Promise<boolean> => {
     try {
-      const res = await fetch(`/api/products/${id}`, {
+      const res = await fetch(`${API_BASE}/api/products/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(product)
@@ -151,7 +153,7 @@ export default function App() {
 
   const onDeleteProduct = async (id: string): Promise<boolean> => {
     try {
-      const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
+      const res = await fetch(`${API_BASE}/api/products/${id}`, { method: "DELETE" });
       const data = await res.json();
       if (!res.ok) {
         setErrorBanner(data.error || "Cannot delete registered product");
@@ -168,7 +170,7 @@ export default function App() {
 
   const onAddCustomer = async (customer: Omit<Customer, "id">): Promise<boolean> => {
     try {
-      const res = await fetch("/api/customers", {
+      const res = await fetch(`${API_BASE}/api/customers`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(customer)
@@ -189,7 +191,7 @@ export default function App() {
 
   const onDeleteCustomer = async (id: string): Promise<boolean> => {
     try {
-      const res = await fetch(`/api/customers/${id}`, { method: "DELETE" });
+      const res = await fetch(`${API_BASE}/api/customers/${id}`, { method: "DELETE" });
       const data = await res.json();
       if (!res.ok) {
         setErrorBanner(data.error || "Unable to delete customer account profile");
@@ -206,7 +208,7 @@ export default function App() {
 
   const onCreateOrder = async (orderData: { customerId: string; items: { productId: string; quantity: number }[] }): Promise<boolean> => {
     try {
-      const res = await fetch("/api/orders", {
+      const res = await fetch(`${API_BASE}/api/orders`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(orderData)
@@ -227,7 +229,7 @@ export default function App() {
 
   const onDeleteOrder = async (id: string): Promise<boolean> => {
     try {
-      const res = await fetch(`/api/orders/${id}`, { method: "DELETE" });
+      const res = await fetch(`${API_BASE}/api/orders/${id}`, { method: "DELETE" });
       const data = await res.json();
       if (!res.ok) {
         setErrorBanner(data.error || "Unable to void purchase order");
