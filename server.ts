@@ -219,8 +219,8 @@ async function startServer() {
   // and prevents blocks associated with wildcard "*" headers.
   app.use(cors({
     origin: (origin, callback) => {
-      // Allow any requesting origin dynamically
-      callback(null, true);
+      // Allow any requesting origin dynamically by echoing it back or fallback to *
+      callback(null, origin || "*");
     },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "Origin", "Accept", "X-Requested-With"],
@@ -231,7 +231,7 @@ async function startServer() {
   // Handle all options preflights using the same dynamic origin configuration
   app.options("*", cors({
     origin: (origin, callback) => {
-      callback(null, true);
+      callback(null, origin || "*");
     },
     credentials: true,
     optionsSuccessStatus: 200
