@@ -214,12 +214,18 @@ function saveDb(data: Database): void {
 async function startServer() {
   const app = express();
   
-  // Robust CORS configuration to allow Vercel and all external origins
+  // Robust CORS configuration to dynamically echo the requesting origin
   app.use(cors({
-    origin: "*",
+    origin: (origin, callback) => {
+      // If there is no origin (e.g. mobile apps, curl, server-to-server), allow it
+      if (!origin) return callback(null, true);
+      callback(null, origin);
+    },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "Origin", "Accept", "X-Requested-With"],
-    credentials: true
+    credentials: true,
+    preflightContinue: false,
+    optionsSuccessStatus: 204
   }));
 
   app.use(express.json());
