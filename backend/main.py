@@ -15,17 +15,11 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Enable CORS for frontend integration.
-# Note: allow_origins cannot contain "*" if allow_credentials is True, which previously caused a startup assertion error/crash.
+# Enable CORS for frontend integration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://inventory-management-drv63x2sh-khushi-ux123s-projects.vercel.app",
-        "http://localhost:3000",
-        "http://localhost:5173"
-    ],
-    allow_origin_regex=r"https://.*|http://localhost:\d+",
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

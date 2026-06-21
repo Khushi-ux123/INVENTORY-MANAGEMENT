@@ -214,28 +214,9 @@ function saveDb(data: Database): void {
 async function startServer() {
   const app = express();
   
-  // Robust CORS configuration to dynamically echo the requesting origin.
-  // This satisfies browser requirements when client-side requests utilize credentials
-  // and prevents blocks associated with wildcard "*" headers.
-  app.use(cors({
-    origin: (origin, callback) => {
-      // Allow any requesting origin dynamically by echoing it back or fallback to *
-      callback(null, origin || "*");
-    },
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "Origin", "Accept", "X-Requested-With"],
-    credentials: true,
-    optionsSuccessStatus: 200
-  }));
-
-  // Handle all options preflights using the same dynamic origin configuration
-  app.options("*", cors({
-    origin: (origin, callback) => {
-      callback(null, origin || "*");
-    },
-    credentials: true,
-    optionsSuccessStatus: 200
-  }));
+  // Enable standard fully permissive CORS for all external origins
+  app.use(cors());
+  app.options("*", cors());
 
   app.use(express.json());
 
